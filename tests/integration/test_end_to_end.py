@@ -29,12 +29,14 @@ def test_testenv_reuse(pytester, monkeypatch, ignore_env_name_mismatch_spec, exp
     pytester.makeini(
         dedent(
             """
+            [tox]
+            env_list = %s
             [testenv]
             env_dir = {toxworkdir}{/}shared
             %s
             commands = %s
             """
-            % (ignore_env_name_mismatch_spec, TOUCH_SCRIPT)
+            % (",".join(envlist), ignore_env_name_mismatch_spec, TOUCH_SCRIPT)
         ),
     )
     pytester.run(sys.executable, "-m", "tox", "-e", ",".join(envlist))
