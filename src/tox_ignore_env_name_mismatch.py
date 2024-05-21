@@ -13,6 +13,14 @@ from tox.tox_env.info import Info
 from tox.tox_env.python.virtual_env.runner import VirtualEnvRunner
 from tox.tox_env.register import ToxEnvRegister
 
+# We don't want to force people to install uv, checking here if it's available
+UV_INSTALLED = True
+try:
+    from tox_uv._run import UvVenvRunner
+except ImportError:
+    UvVenvRunner = object  # type: ignore[assignment,misc]
+    UV_INSTALLED = False
+
 
 class FilteredInfo(Info):
     """Subclass of Info that optionally filters specific keys during compare()."""
@@ -71,7 +79,28 @@ class IgnoreEnvNameMismatchVirtualEnvRunner(VirtualEnvRunner):
         )
 
 
+class IgnoreEnvNameMismatchUvVenvRunner(UvVenvRunner):
+    """UvVenvRunner that does NOT save the env name as part of the cached info."""
+
+    @staticmethod
+    def id() -> str:
+        return "ignore_env_name_mismatch_uv"
+
+    @property
+    def cache(self) -> Info:
+        """Return a modified Info class that does NOT pass "name" key to `Info.compare`."""
+        return FilteredInfo(
+            self.env_dir,
+            filter_keys=["name"],
+            filter_section=ToxEnv.__name__,
+        )
+
+
 @impl
 def tox_register_tox_env(register: ToxEnvRegister) -> None:
     """tox4 entry point: add IgnoreEnvNameMismatchVirtualEnvRunner to registry."""
     register.add_run_env(IgnoreEnvNameMismatchVirtualEnvRunner)
+
+    # If uv is not installed, do not register it
+    if UV_INSTALLED:
+        register.add_run_env(IgnoreEnvNameMismatchUvVenvRunner)

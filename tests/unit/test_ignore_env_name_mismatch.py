@@ -7,10 +7,27 @@ import pytest
 import tox_ignore_env_name_mismatch
 
 
+@mock.patch("tox_ignore_env_name_mismatch.UV_INSTALLED", False)
 def test_tox_register_tox_env_mock():
     register_mock = mock.Mock()
     tox_ignore_env_name_mismatch.tox_register_tox_env(register_mock)
-    register_mock.add_run_env.assert_called_once()
+    assert register_mock.add_run_env.mock_calls == [
+        mock.call(tox_ignore_env_name_mismatch.IgnoreEnvNameMismatchVirtualEnvRunner),
+    ]
+    assert (
+        register_mock.default_env_runner
+        != tox_ignore_env_name_mismatch.IgnoreEnvNameMismatchVirtualEnvRunner.id()
+    )
+
+
+@mock.patch("tox_ignore_env_name_mismatch.UV_INSTALLED", True)
+def test_tox_register_tox_env_mock_with_uv():
+    register_mock = mock.Mock()
+    tox_ignore_env_name_mismatch.tox_register_tox_env(register_mock)
+    assert register_mock.add_run_env.mock_calls == [
+        mock.call(tox_ignore_env_name_mismatch.IgnoreEnvNameMismatchVirtualEnvRunner),
+        mock.call(tox_ignore_env_name_mismatch.IgnoreEnvNameMismatchUvVenvRunner),
+    ]
     assert (
         register_mock.default_env_runner
         != tox_ignore_env_name_mismatch.IgnoreEnvNameMismatchVirtualEnvRunner.id()

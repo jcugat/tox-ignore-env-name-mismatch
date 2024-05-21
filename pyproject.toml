@@ -13,6 +13,9 @@ authors = [
     {name = "Masen Furer", email = "m_github@0x26.net"},
 ]
 requires-python = ">=3.7"
+optional-dependencies.uv = [
+  "tox-uv",
+]
 license = {file = "LICENSE"}
 classifiers = [
     'Development Status :: 4 - Beta',
