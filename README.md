@@ -20,6 +20,11 @@ Please vendor the plugin as described below, or you _will_ get broken.
 1. Install `tox-ignore-env-name-mismatch` in the same environment as `tox`.
 2. Set `runner = ignore_env_name_mismatch` in a testenv to opt-out of recreating the virtualenv when the env name changes.
 
+If you prefer to use [uv](https://github.com/astral-sh/uv) alongside [tox-uv](https://github.com/tox-dev/tox-uv) for extra speed:
+
+1. Install `tox-ignore-env-name-mismatch[uv]`
+2. Set `runner = ignore_env_name_mismatch_uv`
+
 ### To always use this plugin:
 
 #### Vendor
