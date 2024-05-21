@@ -17,6 +17,7 @@ TOUCH_SCRIPT = (
     "ignore_env_name_mismatch_spec, exp_reuse",
     [
         ["runner = ignore_env_name_mismatch", True],
+        ["runner = ignore_env_name_mismatch_uv", True],
         ["", False],
     ],
 )
@@ -53,7 +54,14 @@ def test_testenv_reuse(pytester, monkeypatch, ignore_env_name_mismatch_spec, exp
         assert f"{env}.txt" not in names_in_shared
 
 
-def test_testenv_no_reuse(pytester, monkeypatch):
+@pytest.mark.parametrize(
+    "runner",
+    [
+        "ignore_env_name_mismatch",
+        "ignore_env_name_mismatch_uv",
+    ],
+)
+def test_testenv_no_reuse(pytester, monkeypatch, runner):
     """Although ignore_env_name_mismatch = true, the env can be recreated for other reasons."""
     monkeypatch.delenv("TOX_WORK_DIR", raising=False)
     pytester.makeini(
@@ -64,14 +72,14 @@ def test_testenv_no_reuse(pytester, monkeypatch):
 
             [testenv]
             env_dir = {toxworkdir}{/}shared
-            runner = ignore_env_name_mismatch
+            runner = %s
             deps = wheel
             commands = %s
 
             [testenv:bar]
             deps = wheel < 38.4
             """
-            % TOUCH_SCRIPT
+            % (runner, TOUCH_SCRIPT)
         )
     )
     resp = pytester.run(sys.executable, "-m", "tox")
